@@ -54,8 +54,17 @@ console.log(ele5.classList.contains("delete"));
 ele5.classList.remove("item");
 console.log(ele5.classList);
 
+/*
+Element.addEventListener("event name", function(){
+})
+*/
+let signup = document.querySelector(".signup");
+let form = document.querySelector("Signup");
+signup.addEventListener("click", function(event) {
+    form.classList.toggle("hide");
 
-
-
+    
+    // You can add code here to send this data to the server if needed
+});
 
 
