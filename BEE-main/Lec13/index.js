@@ -7,16 +7,28 @@ function getUserData(URL) {
         return res.json()
     })
     .then((data) => {
-        const ul = document.createElement('ul');
-         data.forEach(user => {
-            const li = document.createElement('li');
-            li.textContent = user.name;
-            ul.appendChild(li);
+        console.log(data);
+        data.forEach(user => {
+            displayUser(user);
         });
-        document.body.appendChild(ul);
     })
     .catch((err) => {
         console.error(err);
     })
+}
+
+let userConatiner = document.querySelector('.user-container');
+function displayUser(user){
+  let li = document.createElement('li');
+  li.setAttribute('class', 'user-item');
+  li.innerHTML = `<div class="user-info">
+                <h1>${user.name}</h1>
+                <p>${user.username}</p>
+            </div>
+            <div class="user-btn">
+                <button class="user-delete">Delete</button>
+                <button class="user-edit">Edit</button>
+            </div>`
+            userConatiner.appendChild(li);
 }
 getUserData('https://jsonplaceholder.typicode.com/users');
