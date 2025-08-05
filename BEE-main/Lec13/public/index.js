@@ -31,4 +31,4 @@ function displayUser(user){
             </div>`
             userConatiner.appendChild(li);
 }
-getUserData('https://localhost:3000/users');
+getUserData('http://localhost:3000/users');
