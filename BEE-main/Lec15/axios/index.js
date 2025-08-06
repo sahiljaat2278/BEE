@@ -1,12 +1,7 @@
-//function to get coments data
-console.log(axios);
+const express= require('express');
+const app= express();
+const fs= require("fs");
+app.listen(3000, () => {
+    console.log("Server is running on port 3000");
+});
 
-function getComentData(URL) {
-
-    axios.get(URL).then((data) => {
-        console.log(data);
-    })
-    .catch(err =>console.error(err));
-  
-}
-getComentData('https://jsonplaceholder.typicode.com/comments')
