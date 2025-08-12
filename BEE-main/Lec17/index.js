@@ -71,7 +71,13 @@ app.get("/users", async (req, res) => {
 
 app.get("/users/:id", async (req, res) => {
   let { id } = req.params;
-  let user = await Users.findOne({ _id: id });
+  let userExists = await Users.exists({ _id: id }).populate("blogs");
+  if(userExists){
+    res.json({
+      success: true,
+      data: userExists
+    });
+  }
   res.json({
     success: true,
     data: user
