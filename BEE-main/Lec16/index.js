@@ -1,41 +1,45 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const app = express();
+const express=require("express");
+const mongoose=require("mongoose");
 
+const app=express();
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended:true}));
 
-const Blogs = require('./model/users');
+const Blogs=require("./model/blog")
+const Users=require("./model/user")
 
-app.post('/blog',async (req,res)=>{
-    let {title, body} = req.body;
-    let newBlog = new Blogs({
-        title: title,
-        body: body,
-        date: new Date()
-    });
-    await newBlog.save();
+app.post("/blogs",async(req,res)=>{
+    let {title,body}=req.body;
+    let newBlog=new Blogs({
+        title:title,
+        body:body,
+        date:Date.now()
+    })
+    await newBlog.save()
     res.json({
-        success: true, 
-        data: newBlog,
-        message: "Blog created successfully"
-    });
+        success:true,
+        data:newBlog,
+        message:"blog added successfully!!!"
+    })
 })
-app.get('/blog',async (req,res)=>{
-    let allBlogs = await Blogs.find();
+
+app.get("/blogs",async(req,res)=>{
+    let allblog=await Blogs.find();
     res.json({
-        success: true,
-        data: allBlogs,
-    });
-});
-app.get('/blog/:id',async (req,res)=>{
-    let {id} = req.params;
-    let blog = await Blogs.findOne({_id: id});
+        success:true,
+        data:allblog
+    })
+})
+
+app.get("/blogs/:id",async(req,res)=>{
+    let {id}=req.params
+    let blog=await Blogs.findOne({_id:id});
     res.json({
-        success: true,
-        data: blog,
-    });
-});
+        success:true,
+        data:blog
+    })
+})
+
 app.post("/users", async (req, res) => {
   let { email, username, password } = req.body;
   let newUser = new Users({
@@ -68,10 +72,9 @@ app.get("/users/:id", async (req, res) => {
   });
 });
 
-
-
-app.listen(3000, () => {
-    console.log(`Server is running on port 3000`);
-});
+app.listen(3000,()=>{
+    console.log("Server started at 3000");
+})
++
 mongoose.connect('mongodb://127.0.0.1:27017/g26DB')
   .then(() => console.log('Connected! 127.0.0.1:27017'));

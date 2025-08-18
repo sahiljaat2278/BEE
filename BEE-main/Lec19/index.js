@@ -9,12 +9,11 @@ app.use("/api/blogs",blogsRoutes)
 
 
 
-
 const userRoutes=require("./routes/userRoutes")
 app.use("/api/users",userRoutes)
 
 
-//DELETE BLOG
+
 
 app.listen(3000,()=>{
     console.log("Server started");
