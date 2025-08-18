@@ -4,12 +4,11 @@ const mongoose=require("mongoose");
 const app=express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-const blogsRoutes=require("./routes/blogsRoutes")
+const blogsRoutes=require("./routes/blogRoutes")
 app.use("/api/blogs",blogsRoutes)
 
-const Blogs=require("./model/user")
-const Users=require("./model/userSchema")
-console.log(Blogs,Users)
+
+
 
 const userRoutes=require("./routes/userRoutes")
 app.use("/api/users",userRoutes)

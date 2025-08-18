@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const user = require("../model/userSchema")
+const Users = require("../model/userSchema")
 // Import the necessary models
 router.post("/", async (req, res) => {
   let { email, username, password } = req.body;

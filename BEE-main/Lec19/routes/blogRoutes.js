@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()//small--->app
-const Blogs = require("../model/blogs")
+const Blogs = require("../model/user")
 
 // Define your blog routes here
 router.post("/",async(req,res)=>{
