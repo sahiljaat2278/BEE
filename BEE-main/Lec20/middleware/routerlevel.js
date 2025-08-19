@@ -3,3 +3,5 @@ function m5(req, res, next) {
     req.userId = "4"
     next(); 
 }
+
+module.exports = { m5 };

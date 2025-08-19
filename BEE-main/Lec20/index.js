@@ -1,9 +1,7 @@
-//middleware - function which run on client requests before controller functions
-
 const express = require("express");
 const { m1, m2 } = require("./middleware/firstmiddleware");
 const { m3 } = require("./middleware/pathlevel");
-
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
