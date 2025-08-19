@@ -1,3 +1,5 @@
+//middleware - function which run on client requests before controller functions
+
 const express = require("express");
 
 const app = express();
