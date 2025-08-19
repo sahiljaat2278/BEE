@@ -8,6 +8,7 @@ function m2(req, res, next) {
     console.log(req.userId);
     req.isAdmin = true;
     next(); 
+    
 }
 module.exports.m1 = m1;
 module.exports.m2 = m2;

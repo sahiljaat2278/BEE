@@ -15,6 +15,13 @@ app.get("/health", (req, res) => {
    res.json({ status: "OK",
     message: "Server is healthy",
     });
+  
+});
+app.get("/home", (req, res) => {
+    console.log("running controller function");
+    res.json({  success: true,
+    message: "Welcome to the home page",
+    });
 });
 
 app.get("/", (req, res) => {
