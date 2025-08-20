@@ -47,15 +47,39 @@ app.get('/health', (req, res) => {
     
 
 
-app.get('/users', async (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
     try {
-        const users = await User.find();
-        res.json(users);
-    } catch (err) {
-        res.json({ error: err.message });
+        let { email, password } = req.body;
+        let userExist = await User.findOne({ email: email, password: password });
+        if (!userExist) {
+            return res.json({
+                success: false,
+                message: 'user does not exist please signup',
+            });
+        }
+    
+        if(userExist.password!=password){
+          return res.json({
+            success: false,
+            message: 'Incorrect password',
+          });
+       }
+        if(userExist.password=password){
+          return res.json({
+            success: true,
+            message: 'login successful',
+          });
+        }
+    } catch (error) {
+        console.log(error);
+        return res.json({
+            error: {
+                message: error.message,
+            }
+        });
     }
 });
-
+    
 
 
 
