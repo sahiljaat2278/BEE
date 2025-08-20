@@ -2,6 +2,7 @@ const express = require("express");
 const { default: mongoose } = require("mongoose");
 const app = express();
 app.get("/health", (req, res) => {
+    
     res.json({ status: "OK", 
         message: "Health check successful" });
 });
