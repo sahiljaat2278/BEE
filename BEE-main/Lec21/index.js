@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const User = require('./model/user');
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 
@@ -15,21 +16,35 @@ app.get('/health', (req, res) => {
 });
 
 //endpoint to create a new user in db
-app.post('/api/users/signup', async (req, res) => {
-    try {
+
+    app.post('/api/users/signup', async (req, res) => {
+        try{
         let { name, email, password } = req.body;
-        let userExists = await User.findOne({ email });
+        let userExists = await User.findOne({ email:email }); // to check whether user already exists
         if (userExists) {
-            return res.json({ success: false, 
-                message: "User already exists with this email please login" });
+            return res.json({
+                success: false,
+                message: 'User already exists with this email please login',
+            })
         }
-        const user = new User({ name, email, password });
-        await user.save();
-        res.status(201).json(user);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
+
+        let newUser = new User({ name:name, email:email, password:password });
+        await newUser.save();
+        res.json({
+            success: true,
+            message: 'User created successfully',
+            user: newUser
+        });
+        } catch (error) {
+            console.log(error.message);
+            res.json({
+            error:{
+               message: error.message,
+            }
+            });
+            }
+    });
+    
 
 
 app.get('/users', async (req, res) => {
@@ -37,7 +52,7 @@ app.get('/users', async (req, res) => {
         const users = await User.find();
         res.json(users);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        res.json({ error: err.message });
     }
 });
 
