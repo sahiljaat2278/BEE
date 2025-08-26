@@ -1,5 +1,6 @@
 const express=require("express");
 const mongoose=require("mongoose");
+const jwt = require("jsonwebtoken");
 
 const app=express();
 app.use(express.json());
@@ -8,28 +9,77 @@ app.use(express.urlencoded({extended:true}));
 const Blogs=require("./model/user")
 const Users=require("./model/userSchema")
 console.log(Blogs,Users)
+function isLogin(req, res, next) {
+  let token = req.headers.authorization; 
 
-app.post("/blogs",async(req,res)=>{
-    let {title,body,userId}=req.body;
-    let userExists=await Users.findById(userId);
-    if(userExists){
-      let newBlog=new Blogs({
-        title:title,
-        body:body,
-        date:Date.now(),
-        userId:userId
-    })
+  if (!token) {
+    return res.json({
+      success: false,
+      message: "Please login first"
+    });
+  }
+
+  try {
+    let decode = jwt.verify(token, "okk"); 
+    req.userId = decode.userId; 
+    next();
+  } catch (err) {
+    return res.json({
+      success: false,
+      message: "Invalid or expired token"
+    });
+  }
+}
+// LOGIN
+app.post("/login", async (req, res) => {
+  let { email, password } = req.body;
+
+  let user = await Users.findOne({ email, password }); 
+  if (!user) {
+    return res.json({
+      success: false,
+      message: "Invalid email or password"
+    });
+  }
+
+  // create token
+  let token = jwt.sign({ userId: user._id }, "okk", { expiresIn: "1h" });
+
+  res.json({
+    success: true,
+    message: "Login successful",
+    token: token
+  });
+});
+
+
+// Adding a blog 
+app.post("/blogs", isLogin, async (req, res) => {
+  let { title, body } = req.body;
+  let userId = req.userId;  
+
+  let userExists = await Users.findById(userId);
+  if (userExists) {
+    let newBlog = new Blogs({
+      title: title,
+      body: body,
+      date: Date.now(),
+      userId: userId
+    });
+
     await newBlog.save();
     userExists.blogs.push(newBlog._id);
     await userExists.save();
-    res.json({
-        success:true,
-        data:newBlog,
-        message:"blog added successfully!!!"
-    })
-    }
-})
 
+    res.json({
+      success: true,
+      data: newBlog,
+      message: "Blog added successfully!!!"
+    });
+  }
+});
+
+//getting all blogs
 app.get("/blogs",async(req,res)=>{
     let allblog=await Blogs.find();
     res.json({
@@ -37,7 +87,7 @@ app.get("/blogs",async(req,res)=>{
         data:allblog
     })
 })
-
+//getting single blog by id
 app.get("/blogs/:id",async(req,res)=>{
     let {id}=req.params
     let blog=await Blogs.findOne({_id:id});
@@ -46,7 +96,7 @@ app.get("/blogs/:id",async(req,res)=>{
         data:blog
     })
 })
-
+//Adding a user to db
 app.post("/users", async (req, res) => {
   let { email, username, password } = req.body;
   let newUser = new Users({
@@ -61,7 +111,7 @@ app.post("/users", async (req, res) => {
     message: "user added successfully!!!"
   });
 });
-
+//getting all users
 app.get("/users", async (req, res) => {
   let allUsers = await Users.find();
   res.json({
@@ -69,7 +119,7 @@ app.get("/users", async (req, res) => {
     data: allUsers
   });
 });
-
+//getting single user by id
 app.get("/users/:id", async (req, res) => {
   let { id } = req.params;
   console.log(id)
