@@ -134,50 +134,73 @@ app.get("/users/:id", async (req, res) => {
 });
 
 //DELETE BLOG
-app.delete("/blogs/:blogId",async (req,res)=>{
-  let {blogId}=req.params;
-  let {userId}=req.body;
-  let blogExists=await Blogs.findById(blogId);
-  if(!blogExists) return res.json({
-    success:false,
-    message:"Blog doesn't exists"
-  })
-  if(blogExists.userId!=userId)({
-    success:false,
-    message:"You are not allowed to delete the blog"
-  })
+app.delete("/blogs/:blogId", isLogin, async (req, res) => {
+  let { blogId } = req.params;
+  let userId = req.userId; 
+
+  let blogExists = await Blogs.findById(blogId);
+  if (!blogExists) {
+    return res.json({
+      success: false,
+      message: "Blog doesn't exist"
+    });
+  }
+
+  // check ownership
+  if (blogExists.userId.toString() !== userId) {
+    return res.json({
+      success: false,
+      message: "You are not allowed to delete this blog"
+    });
+  }
+
   await Blogs.findByIdAndDelete(blogId);
-  let userExist=await Users.findById(userId);
-  let blog=userExist.blogs.filter((id)=> id!=blogId);
-  userExist.blogs=blog;
+
+  let userExist = await Users.findById(userId);
+  userExist.blogs = userExist.blogs.filter((id) => id.toString() !== blogId);
   await userExist.save();
+
   res.json({
-    success:true,
-    message:"Blog deleted successfully",
-    data:userExist
-  })
-})
+    success: true,
+    message: "Blog deleted successfully",
+    data: userExist
+  });
+});
 
 //UPDATE BLOG
-app.put("/blogs/:blogId",async (req,res)=>{
-  let {blogId}=req.params;
-  let {title,body,userId}=req.body;
-  let blogExists1=await Blogs.findById(blogId);
-  if(!blogExists1) return res.json({
-    success:false,
-    message:"Blog doesn't exists"
-  })
-  if(blogExists1.userId!=userId)({
-    success:false,
-    message:"You are not allowed to delete the blog"
-  })
-  let updatedBlog = await Blogs.findByIdAndUpdate(blogId,{ title, body } );
-  res.json({
-      success: true,
-      message: "Blog updated successfully",
-      data: updatedBlog
+app.put("/blogs/:blogId", isLogin, async (req, res) => {
+  let { blogId } = req.params;
+  let { title, body } = req.body;
+  let userId = req.userId; 
+
+  let blogExists = await Blogs.findById(blogId);
+  if (!blogExists) {
+    return res.json({
+      success: false,
+      message: "Blog doesn't exist"
     });
-})
+  }
+
+  // check ownership
+  if (blogExists.userId.toString() !== userId) {
+    return res.json({
+      success: false,
+      message: "You are not allowed to update this blog"
+    });
+  }
+
+  let updatedBlog = await Blogs.findByIdAndUpdate(
+    blogId,
+    { title, body },
+    { new: true } 
+  );
+
+  res.json({
+    success: true,
+    message: "Blog updated successfully",
+    data: updatedBlog
+  });
+});
 
 app.listen(3000,()=>{
     console.log("Server started");
