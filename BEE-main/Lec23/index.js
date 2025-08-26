@@ -43,7 +43,7 @@ app.post("/login", async (req, res) => {
   }
 
   // create token
-  let token = jwt.sign({ userId: user._id }, "okk", { expiresIn: "1h" });
+  let token = jwt.sign({ userId: user._id }, "okk");
 
   res.json({
     success: true,
