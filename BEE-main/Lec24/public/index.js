@@ -28,3 +28,32 @@ signupForm.addEventListener("submit",async function(e){
         alert("Signup failed: " + data.message);
     }
 })
+let loginForm=document.querySelector("#login-form");
+let loginEmail=document.querySelector("#login-email");
+let loginPassword=document.querySelector("#login-password");
+
+loginForm.addEventListener("submit",async function(e){
+    e.preventDefault();
+    let emailValue=loginEmail.value;
+    let passwordValue=loginPassword.value;
+
+    let res = await fetch("/login",{
+        method:"POST",
+        body:JSON.stringify({
+            email:emailValue,
+            password:passwordValue
+        }),
+        headers:{"Content-Type":"application/json"}
+    })
+
+    let data = await res.json();
+    console.log(data);
+    if(data.success){
+        let token = data.token;
+        localStorage.setItem("token", token);
+        alert("Login successful!");
+        loginForm.reset();
+    } else {
+        alert("Login failed: " + data.message);
+    }
+})
