@@ -1,5 +1,3 @@
-const { sign } = require("jsonwebtoken");
-
 let signupForm=document.querySelector("#signup-form");
 let signupName=document.querySelector("#signup-name");
 let signupEmail=document.querySelector("#signup-email");
@@ -23,4 +21,10 @@ signupForm.addEventListener("submit",async function(e){
 
     let data = await res.json();
     console.log(data);
+    if(data.success){
+        alert("Signup successful! Welcome, " + data.data.username);
+        signupForm.reset();
+    } else {
+        alert("Signup failed: " + data.message);
+    }
 })

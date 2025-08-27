@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const app=express();
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-
+app.use(express.static(__dirname + "/public"));
 const Blogs=require("./model/user")
 const Users=require("./model/userSchema")
 console.log(Blogs,Users)
