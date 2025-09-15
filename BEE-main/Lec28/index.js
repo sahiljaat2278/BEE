@@ -10,13 +10,13 @@ const prisma = new PrismaClient();
     })
 
 }
-// adduser("sahilthory@gmail.com", "sahil", "1234")
+// adduser("sahilthory1@gmail.com", "sahil", "1234")
 // .then(() => {
 //     console.log("User added");
 // })
 
-function getallusers() {
-    let allusers = prisma.user.findMany();
+async function getallusers() {
+    let allusers = await prisma.user.findMany();
     return allusers;
 }
 getallusers().then((data) => {
