@@ -1,4 +1,4 @@
-const { PrismaClient } = require('/generated/prisma');
+const { PrismaClient } = require('./generated/prisma');
 const prisma = new PrismaClient();
  async function adduser(email, name, password) {
     await prisma.user.create({
@@ -10,3 +10,7 @@ const prisma = new PrismaClient();
     })
 
 }
+adduser("sahilthory@gmail.com", "sahil", "1234")
+.then(() => {
+    console.log("User added");
+})
