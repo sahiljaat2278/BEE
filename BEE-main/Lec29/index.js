@@ -40,12 +40,32 @@ async function getUserTweet(userId){
     return tweets;
 }
 
-    getUserTweet(1).then(tweets => {
-        console.log(tweets);
-    });
+    // getUserTweet(1).then(tweets => {
+    //     console.log(tweets);
+    // });
 
-//user who's id is 1 wants to update his tweet-->tweet id is 1
-
-function updateTweet(tweetid,userId,updatecontent){
-    
+async function updateTweet(tweetId,userId,updatedContent){
+   let tweet = await prisma.tweet.findUnique({
+      where: {
+         id: Number(tweetId)
+      }
+   });
+   if(!tweet){
+      return "Tweet not found";
+   }
+   if(tweet.userId != Number(userId)){
+      return "user can not update";
+   }
+   await prisma.tweet.update({
+      where:{
+         id:Number(tweetId)
+      },
+      data:{ 
+         content:updatedContent
+      }
+   });
 }
+updateTweet("1","1","Updated tweet content")
+.then(()=>{
+   console.log("Tweet updated");
+});
