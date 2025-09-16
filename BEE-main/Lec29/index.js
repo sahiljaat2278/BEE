@@ -43,3 +43,9 @@ async function getUserTweet(userId){
     getUserTweet(1).then(tweets => {
         console.log(tweets);
     });
+
+//user who's id is 1 wants to update his tweet-->tweet id is 1
+
+function updateTweet(tweetid,userId,updatecontent){
+    
+}
