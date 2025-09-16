@@ -8,4 +8,9 @@ const prisma = new PrismaClient();
             password: password
         }
     })
+
 }
+ adduser("sahilthory1@gmail.com", "sahil", "1234")
+.then(() => {
+    console.log("User added");
+})
