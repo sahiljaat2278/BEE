@@ -1,5 +1,7 @@
 const {PrismaClient} = require('./generated/prisma');
 const prisma = new PrismaClient();
+
+//Add User
 async function addUser(email,name,password){
    let newUser = await prisma.user.create({
     data:{
@@ -12,9 +14,10 @@ async function addUser(email,name,password){
   return newUser;
 }
 
-// addUser("sahil2@gmail.com","sahil2","12345")
+// addUser("sahil@gmail.com","sahil","12345")
 // .then(()=>{console.log("User added");})
 
+//Add Tweet
 async function addTweet(content,userId){
     let newTweet = await prisma.tweet.create({
         data:{
@@ -26,11 +29,12 @@ async function addTweet(content,userId){
 
 }
 
-// addTweet("My first tweet",1)
+// addTweet("My first tweet",3)
 // .then(()=>{
 //     console.log("Tweet added");
 // })
 
+//Get User Tweet
 async function getUserTweet(userId){
     let tweets = await prisma.tweet.findMany({
         where:{
@@ -40,10 +44,11 @@ async function getUserTweet(userId){
     return tweets;
 }
 
-    // getUserTweet(1).then(tweets => {
-    //     console.log(tweets);
-    // });
+   //  getUserTweet(1).then(tweets => {
+   //      console.log(tweets);
+   //  });
 
+//Update Tweet
 async function updateTweet(tweetId,userId,updatedContent){
    let tweet = await prisma.tweet.findUnique({
       where: {
@@ -71,6 +76,7 @@ async function updateTweet(tweetId,userId,updatedContent){
 // });
 
 
+//Delete User
 async function deleteUser(userId){
    await prisma.user.delete({
       where:{
@@ -78,15 +84,24 @@ async function deleteUser(userId){
       }
    });
 }
-deleteUser(3)
-.then(()=>{
-   console.log("User deleted");
-})
 
-async function printAllUsers() {
-    const users = await prisma.user.findMany();
-    users.forEach(user => {
-        console.log(`Name: ${user.name}, Email: ${user.email}`);
-    });
-}
-// printAllUsers();
+// deleteUser(1)
+// .then(()=>{
+//    console.log("User deleted");
+// })
+
+
+
+   async function printAllUserEmailName() {
+      const users = await prisma.user.findMany({
+         select: {
+            email: true,
+            name: true
+         }
+      });
+      users.forEach(user => {
+         console.log(`Email: ${user.email}, Name: ${user.name}`);
+      });
+   }
+
+   printAllUserEmailName();
