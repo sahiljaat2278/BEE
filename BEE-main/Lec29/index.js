@@ -12,7 +12,7 @@ async function addUser(email,name,password){
   return newUser;
 }
 
-// addUser("vansh@gmail.com","vansh","12345")
+// addUser("sahil2@gmail.com","sahil2","12345")
 // .then(()=>{console.log("User added");})
 
 async function addTweet(content,userId){
@@ -65,7 +65,28 @@ async function updateTweet(tweetId,userId,updatedContent){
       }
    });
 }
-updateTweet("1","1","Updated tweet content")
+// updateTweet("1","1","Updated tweet content")
+// .then(()=>{
+//    console.log("Tweet updated");
+// });
+
+
+async function deleteUser(userId){
+   await prisma.user.delete({
+      where:{
+         id:Number(userId)
+      }
+   });
+}
+deleteUser(3)
 .then(()=>{
-   console.log("Tweet updated");
-});
+   console.log("User deleted");
+})
+
+async function printAllUsers() {
+    const users = await prisma.user.findMany();
+    users.forEach(user => {
+        console.log(`Name: ${user.name}, Email: ${user.email}`);
+    });
+}
+// printAllUsers();
