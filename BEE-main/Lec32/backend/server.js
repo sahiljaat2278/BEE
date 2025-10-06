@@ -20,6 +20,9 @@ ws.on('connection', function(socket) {
     allsocket.push(socket);
     socket.on("message", function(message) {
         console.log("Received: " +" "+ message.toString());
+         if(message.toString() === "Ping") {
+            socket.send("Pong");
+        }
         allsocket.forEach((s) => {
             s.send(message.toString());
         })
