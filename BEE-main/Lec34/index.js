@@ -13,3 +13,5 @@ async function readProfile(){
    let data= await client.get("User:1");
    return data;
 }
+// cacheUserProfile().then(() => console.log("User Profile Cached"));
+readProfile().then((data) => console.log(data, JSON.parse(data)) );
