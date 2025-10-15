@@ -2,31 +2,49 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const {Queue} = require('bullmq');
+const { Worker } = require('bullmq');
 
-const { Queue } = require('bullmq');   
+let codeQueue = new Queue('code-queue',{
+    connection:{
+        host:'localhost',
+        port:6379,
+    }
+});
+    
 
-let codeQueue = new Queue('code-queue', {
-  connection: { host: "localhost",
-     port: 6379 } // 
+app.post("/api/submission", async function (req, res) {
+    let {qId, code, language} = req.body;
+    let job = await codeQueue.add('submission', { qId, code, language });
+    console.log(job.id);
+    
+
+    //offload the job to message queue, so that a worker can do the task
+    res.json({
+        submissionId: job.id
+    });
 });
 
-app.post('/api/submission', async (req, res) => {
-  let { qId, code, language } = req.body;
+let worker = new Worker('code-queue',function(job){
+    let {qId, code, language} = job.data;
+    return {
+        qId:qId,
+        status:"success",
+        time: "4ms",
+        beat: "top 10%"
+    };
 
+},{
+    connection: {
+        host: 'localhost',
+        port: 6379,
+    }
+});
 
-  let Job = await codeQueue.add("code-queue", {
-    qId,
-    code,
-    language
-  });
-
-  console.log(Job.id);
-
-  res.json({
-    message: "Your submission is in queue"
-  });
+worker.on('error', err => {
+    console.error(err)
 });
 
 app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+    console.log('Server is running on port 3000');
 });
