@@ -27,6 +27,20 @@ class OrderBook {
             })
         }
     }
+    ////Public function
+_PlaceOrder(){
+
+
+}
+_marketMatch(){
+
+
+}
+_limitMatch(){
+
+
+
+}
 }
 //_ is just used so other devlopers know that this is a private function or variable
 //if a function or variable starts with _(private)
