@@ -8,7 +8,7 @@ class OrderBook {
     }
     //helper
     _genOrderID(){
-        return this.nextId++;
+        return this._nextId++;
     }
     _sort(sides){
         if(sides==="BUY"){
@@ -37,9 +37,9 @@ let BTCUSDOrderBook = new OrderBook()
 
 BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:100,quantity:10,timestamp:Date.now(),user:"Sahil"})
 
-BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"LIMIT",price:101,quantity:10,timestamp:Date.now(),user:"Aman"})
+BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:101,quantity:10,timestamp:Date.now(),user:"Aman"})
 
-BTCUSDOrderBook.asks.push({orderId:2,side:"SELL",type:"LIMIT",price:105,quantity:10,timestamp:Date.now(),user:"Ankit"})  
+BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:105,quantity:10,timestamp:Date.now(),user:"Ankit"})  
 
 BTCUSDOrderBook._sort("BUY")
 console.log(BTCUSDOrderBook.bids);
