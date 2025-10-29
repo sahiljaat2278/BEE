@@ -1,14 +1,14 @@
 class OrderBook {
     constructor(symbol="BTCUSD") {
-        this.bids=[],
-        this.asks=[],
-        this.nextId=1,
-        this.lastTradePrice=null
-
+        this.symbol = symbol;
+        this.bids = [];
+        this.asks = [];
+        this.nextId = 1;
+        this.lastTradePrice = null;
     }
     //helper
     _genOrderID(){
-        return this._nextId++;
+        return this.nextId++;
     }
     _sort(sides){
         if(sides==="BUY"){
@@ -52,9 +52,9 @@ _PlaceOrder(symbol,side,type,price=null,quantity,user){
         side: side,
         type: type,
         price: price,
-        orignlQty: quantity,
+        originalQty: quantity,
         remainQty: quantity,
-        exectedQty: 0,
+        executedQty: 0,
         timestamp: Date.now(),
         user: user
     };
@@ -65,25 +65,72 @@ _PlaceOrder(symbol,side,type,price=null,quantity,user){
         this._limitMatch(order);
     }
 }
-_marketMatch(order){
-    if(type==="BUY"){
-        let askArr= this.asks
-        let top = askArr[0];
-        while(order.remainQty>0 && askArr.length>0){
-             let orderfill= Math.min(order.remainQty,top.remainQty);
-             order.exectedQty = order.exectedQty + orderfill;
 
-             top.exectedQty = top.exectedQty + orderfill;
-             top.remainQty = top.remainQty - orderfill;
+_marketMatch(order){
+    // use order.side (not undefined variable)
+    if(order.side === "BUY"){
+        let askArr = this.asks;
+        
+        while(order.remainQty > 0 && askArr.length > 0){
+            let top = askArr[0];
+            // support orders that may use `quantity` as initial size
+            let topRemain = (top.remainQty != null) ? top.remainQty : (top.quantity != null ? top.quantity : 0);
+            let orderfill = Math.min(order.remainQty, topRemain);
+
+            order.executedQty = order.executedQty + orderfill;
+            top.executedQty = (top.executedQty || 0) + orderfill;
+            top.remainQty = topRemain - orderfill;
+
+            if(top.remainQty === 0){
+                askArr.shift();
+            } else {
+                // partially filled top, continue or break based on business logic
+                if(order.remainQty <= 0) break;
+            }
+
+            order.remainQty = order.remainQty - orderfill;
+        }
+    } else if(order.side === "SELL"){
+        let bidArr = this.bids;
+
+        while(order.remainQty > 0 && bidArr.length > 0){
+            let top = bidArr[0];
+            let topRemain = (top.remainQty != null) ? top.remainQty : (top.quantity != null ? top.quantity : 0);
+            let orderfill = Math.min(order.remainQty, topRemain);
+
+            order.executedQty = order.executedQty + orderfill;
+            top.executedQty = (top.executedQty || 0) + orderfill;
+            top.remainQty = topRemain - orderfill;
+
+            if(top.remainQty === 0){
+                bidArr.shift();
+            }
+
+            order.remainQty = order.remainQty - orderfill;
         }
     }
 }
+
 _limitMatch(order){
+    // simple limit match: insert into book and sort
+    if(order.side === "BUY"){
+        this.bids.push(Object.assign({}, order));
+        this._sort("BUY");
+    } else {
+        this.asks.push(Object.assign({}, order));
+        this._sort("SELL");
+    }
+}
 
-
-
+getBookSnapshot(){
+    return {
+        lastUpdated: Date.now(),
+        bids: this.bids.map((o)=>[o.price]),
+        asks: this.asks.map((o)=>[o.price])
+    }
 }
 }
+
 //_ is just used so other devlopers know that this is a private function or variable
 //if a function or variable starts with _(private)
 ///Let OrderBook = new OrderBook("BTCUSD")
