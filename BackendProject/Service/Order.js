@@ -1,148 +1,153 @@
-class OrderBook {
-    constructor(symbol="BTCUSD") {
-        this.symbol = symbol;
-        this.bids = [];
-        this.asks = [];
-        this.nextId = 1;
-        this.lastTradePrice = null;
+class OrderBook{
+    constructor(symbol="BTCUSD"){
+        this.bids= [],
+        this.ask= [],
+        this._nextId= 1,
+        this.lastTradedPrice=null
+
     }
     //helper
-    _genOrderID(){
-        return this.nextId++;
+    _genOrderId(){
+        return this._nextId++;
     }
     _sort(sides){
         if(sides==="BUY"){
             this.bids.sort((a,b)=>{
-                if(a.price !=b.price){
-                    return b.price - a.price
+                if(a.price!=b.price){
+                    return b.price - a.price;
                 }
-                return a.timestamp - b.timestamp
+                return a.timestamp - b.timestamp;
             })
         }else{
-            this.asks.sort((a,b)=>{
-                if(a.price !=b.price){
-                    return a.price - b.price
+            this.ask.sort((a,b)=>{
+                if(a.price!=b.price){
+                    return a.price - b.price;
                 }
-                return a.timestamp - b.timestamp
+                return a.timestamp - b.timestamp;
             })
+
         }
     }
-    ////Public function
-    /*
-    1. create new order {orderID,side,type,price?,orignqty,remainingquantity,execqty,timestamp,user}
-    2. match type if ==market ,call market, else call limit match
-     */
-_PlaceOrder(symbol,side,type,price=null,quantity,user){
-    // Basic Validation 
-    /**
-     bids:[]sorted descending,
-     asks:[]sorted ascending
+    //   explain the logic why bids and ask are sorted in such way ?
+    // Ans - Bids are sorted in descending order because buyers want to pay the lowest price possible, so higher bids take precedence.
+    // Asks are sorted in ascending order because sellers want to sell at the highest price possible, so lower asks take precedence.
+    
 
-     1. type : buy | sell
-     2. if buy start buying from ask array starting from index 0.
-      loop while order.remainQTY>0 && ask.length>0
-      buy min(order.remainingQty,ask[0].remainingQty)
-      update remaining qty and executedqty from both side
+    //function to place new order in orderbook
+    /* 
+    1. create new order {orderId,side,type,price?,orignqty,remainingqty,execqty,timestamp,user}
+    2. match type if type == market , call marketMatch else call limitMatch
+    
+    */
+
+    placeholder(side,type,price=null,quantity,user){
+        /* Baasic Validation */
+        let order = {
+            orderId : this._genOrderId(),
+            symbol : this.symbol,
+            side : side,
+            type : type,
+            price : price,
+            orignqty : quantity,
+            remainqty : quantity,
+            execqty : 0,
+            timestamp : Date.now(),
+            user : user
+        }
+        if(type==="MARKET"){
+            let result = this._marketMatch(order);
+            if(order.remainqty>0){
+                console.log(" order completed "+ result.execqty+ " order.remainqty"+result.remainqty);
+            }
+        }else{
+            let result = this._limitMatch(order);
+        }
+    }
+    //execute order if it is market order
+    /* 
+    bids: [] sorted descending
+    ask: [] sorted ascending
+    1. type: buy/sell
+    2. if buy start buying from asks array starting from index 0.
+    loop while order remainingqty >0 and asks.length>0
+    buy min(order.remainingqty,asks[0].remainingqty)
+    update remainingqty and execqty of both orders
+  
 
     */
-        
-    
-    let order={
-        symbol: this.symbol,
-        side: side,
-        type: type,
-        price: price,
-        originalQty: quantity,
-        remainQty: quantity,
-        executedQty: 0,
-        timestamp: Date.now(),
-        user: user
-    };
-   
-    if(type === "MARKET"){
-        this._marketMatch(order);
-    }else{
-        this._limitMatch(order);
-    }
-}
-
-_marketMatch(order){
-    // use order.side (not undefined variable)
-    if(order.side === "BUY"){
-        let askArr = this.asks;
-        
-        while(order.remainQty > 0 && askArr.length > 0){
+    _marketMatch(order){
+       if(order.side==="BUY"){
+         let askArr = this.ask;
+         
+          while(order.remainqty>0 && askArr.length>0){
             let top = askArr[0];
-            // support orders that may use `quantity` as initial size
-            let topRemain = (top.remainQty != null) ? top.remainQty : (top.quantity != null ? top.quantity : 0);
-            let orderfill = Math.min(order.remainQty, topRemain);
+            let orderfill = Math.min(order.remainqty,top.remainqty);
+            order.execqty += orderfill;
+            order.remainqty -= orderfill;
 
-            order.executedQty = order.executedQty + orderfill;
-            top.executedQty = (top.executedQty || 0) + orderfill;
-            top.remainQty = topRemain - orderfill;
+            top.execqty += orderfill;
+            top.remainqty -= orderfill;
 
-            if(top.remainQty === 0){
+            if(top.remainqty<=0){
                 askArr.shift();
-            } else {
-                // partially filled top, continue or break based on business logic
-                if(order.remainQty <= 0) break;
             }
-
-            order.remainQty = order.remainQty - orderfill;
+          }
         }
-    } else if(order.side === "SELL"){
-        let bidArr = this.bids;
+        return {order}
+    }
 
-        while(order.remainQty > 0 && bidArr.length > 0){
-            let top = bidArr[0];
-            let topRemain = (top.remainQty != null) ? top.remainQty : (top.quantity != null ? top.quantity : 0);
-            let orderfill = Math.min(order.remainQty, topRemain);
+    //execute order if it is limit order
+    _limitMatch(){
+        if(order.side==="BUY"){
+            let opposite = this.ask;
+            while(order.remainqty>0 && opposite.length>0){
+                let top = opposite[0];
+                if(order.price>=top.price){
+                    let filledOrders = Math.min(order.remainqty,top.remainqty);
+                    order.execqty += filledOrders;
+                    order.remainqty -= filledOrders;
 
-            order.executedQty = order.executedQty + orderfill;
-            top.executedQty = (top.executedQty || 0) + orderfill;
-            top.remainQty = topRemain - orderfill;
-
-            if(top.remainQty === 0){
-                bidArr.shift();
+                    top.execqty += filledOrders;
+                    top.remainqty -= filledOrders;
+                    if(top.remainqty<=0){
+                        opposite.shift();
+                    }
+                }
             }
-
-            order.remainQty = order.remainQty - orderfill;
+            if(order.remainqty>0){
+                this.bids.push(order);
+                this._sort("BUY"); 
+            }
+        }
+        
+    }
+    getBookSnapshot(){
+        return {
+            lastUpdated : Date.now(),
+            bids: this.bids.map((o)=>([o.price,o.remainqty])),
+            ask: this.ask.map((o)=>([o.price,o.remainqty])),
+            // currentPrice:
         }
     }
 }
-
-_limitMatch(order){
-    // simple limit match: insert into book and sort
-    if(order.side === "BUY"){
-        this.bids.push(Object.assign({}, order));
-        this._sort("BUY");
-    } else {
-        this.asks.push(Object.assign({}, order));
-        this._sort("SELL");
-    }
-}
-
-getBookSnapshot(){
-    return {
-        lastUpdated: Date.now(),
-        bids: this.bids.map((o)=>[o.price]),
-        asks: this.asks.map((o)=>[o.price])
-    }
-}
-}
-
-//_ is just used so other devlopers know that this is a private function or variable
-//if a function or variable starts with _(private)
-///Let OrderBook = new OrderBook("BTCUSD")
+//if a function or variable start with (private)
+//let orderbook = new OrderBook("BTCUSD")
+let BTCUSDOrderBook = new OrderBook("BTCUSD");
 
 
-let BTCUSDOrderBook = new OrderBook()
 
-BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:100,quantity:10,timestamp:Date.now(),user:"Sahil"})
+BTCUSDOrderBook.placeholder("BUY","LIMIT","1506.00",10,"Gaurish");
+BTCUSDOrderBook.placeholder("BUY","LIMIT","1505.00",20,"Sahil");
+BTCUSDOrderBook.placeholder("BUY","LIMIT","1500.00",10,"Vansh");
 
-BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:101,quantity:10,timestamp:Date.now(),user:"Aman"})
+BTCUSDOrderBook.placeholder("SELL","LIMIT","1510.00",5,"Anuj");
+BTCUSDOrderBook.placeholder("SELL","LIMIT","1515.00",15,"Rohit");
+BTCUSDOrderBook.placeholder("SELL","LIMIT","1520.00",10,"Karan");
 
-BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:105,quantity:10,timestamp:Date.now(),user:"Ankit"})  
+console.log(BTCUSDOrderBook.getBookSnapshot());
 
-BTCUSDOrderBook._sort("BUY")
-console.log(BTCUSDOrderBook.bids);
+
+
+
+// BTCUSDOrderBook._sort("BUY");
+// console.log(BTCUSDOrderBook.bids);
