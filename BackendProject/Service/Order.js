@@ -118,6 +118,26 @@ class OrderBook{
                 this.bids.push(order);
                 this._sort("BUY"); 
             }
+        }else{
+            let opposite = this.bids;
+            while(order.remainqty>0 && opposite.length>0){
+                let top = opposite[0];
+                if(order.price<=top.price){
+                    let filledOrders = Math.min(order.remainqty,top.remainqty);
+                    order.execqty += filledOrders;
+                    order.remainqty -= filledOrders;
+                    
+                    top.execqty += filledOrders;
+                    top.remainqty -= filledOrders;
+                    if(top.remainqty<=0){
+                        opposite.shift();
+                    }
+                }
+            }
+            if(order.remainqty>0){
+                this.ask.push(order);
+                this._sort("SELL"); 
+            }
         }
         
     }
