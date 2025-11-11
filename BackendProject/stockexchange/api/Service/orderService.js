@@ -51,13 +51,19 @@ class OrderBook {
 
         if (type === "MARKET") {
             let result = this._marketMatch(order);
-            if (result.remainingQty > 0) {
-                console.log(`Order partially filled: executed ${result.exectQty}, canceled ${result.remainingQty}`);
+            // if (result.remainingQty > 0) {
+            //     console.log("Order completed: " + result.exectQty + " " + "cancel order: " + result.remainingQty);
+            // }
+            return{
+                book:this.getBookSnapshot(),
+                result
             }
-            return result;
         } else {
             let result = this._limitMatch(order);
-            return order;
+            return{
+                book:this.getBookSnapshot(),
+                result
+            }
         }
     }
 
@@ -168,6 +174,7 @@ class OrderBook {
                 this._sort("SELL");
             }
         }
+        return order;
     }
 
     getBookSnapshot() {
@@ -179,7 +186,7 @@ class OrderBook {
     }
 }
 
-// Demo/test code removed from module; OrderBook class exported for use by application
+let BTCUSDOrderBook=new OrderBook()
 
 // BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:100,quantity:10,timestamp:Date.now(),user:"Saloni"});
 // BTCUSDOrderBook.bids.push({orderId:2,side:"BUY",type:"MARKET",price:95,quantity:10,timestamp:Date.now(),user:"Sanam"});
@@ -200,4 +207,37 @@ class OrderBook {
 // console.log(BTCUSDOrderBook.ask);
 
 
-module.exports = OrderBook;
+console.log(BTCUSDOrderBook.getBookSnapshot());
+//fill bids as market maker
+BTCUSDOrderBook.placeOrder("BUY","LIMIT","1506.00",10,"Vanshika");
+BTCUSDOrderBook.placeOrder("BUY","LIMIT","1505.00",20,"Sanam");
+BTCUSDOrderBook.placeOrder("BUY","LIMIT","1500",10,"Saloni");
+
+console.log(BTCUSDOrderBook.getBookSnapshot());
+
+//fill ask as market maker
+BTCUSDOrderBook.placeOrder("SELL","LIMIT","1507.00",10,"Saloni");
+BTCUSDOrderBook.placeOrder("SELL","LIMIT","1508.00",10,"Saloni");
+BTCUSDOrderBook.placeOrder("SELL","LIMIT","1509.00",10,"Saloni");
+
+console.log(BTCUSDOrderBook.getBookSnapshot());
+
+console.log("Placing SELL LIMIT order @1505 (should match existing BUY orders)");
+BTCUSDOrderBook.placeOrder("SELL", "LIMIT", 1505.00, 5, "Sanam");
+console.log(BTCUSDOrderBook.getBookSnapshot());
+console.log("Placing BUY LIMIT order @1508 (should match existing SELL orders)");
+BTCUSDOrderBook.placeOrder("BUY", "LIMIT", 1508.00, 8, "Vanshika");
+console.log(BTCUSDOrderBook.getBookSnapshot());
+
+console.log("Placing BUY MARKET order (should take from best ASK)");
+BTCUSDOrderBook.placeOrder("BUY", "MARKET", null, 15, "Aman");
+console.log(BTCUSDOrderBook.getBookSnapshot());
+
+console.log("Placing SELL MARKET order (should take from best BID)");
+BTCUSDOrderBook.placeOrder("SELL", "MARKET", null, 12, "Isha");
+console.log(BTCUSDOrderBook.getBookSnapshot());
+
+console.log("Final Order Book Snapshot:");
+console.log(BTCUSDOrderBook.getBookSnapshot());
+
+module.exports=OrderBook;
